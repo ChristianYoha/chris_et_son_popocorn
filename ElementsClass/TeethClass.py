@@ -23,8 +23,6 @@ class TeethClass(Sprite):
             selected_teeth_image.get_rect(center=self.position),
         ]
 
-
-
     @property
     def image(self):
         return self.teeth_images[1] if self.mouse_over else self.teeth_images[0]
@@ -42,26 +40,24 @@ class TeethClass(Sprite):
             else:
                 self.mouse_over = False
 
-    def select(self, mouse_pos, mouse_up, score_instances, score_value, BLACK_BLUE):
+    def select(self, score_instances, score_value, BLACK_BLUE):
         new_score_value = score_value
-        if self.rect.collidepoint(mouse_pos) and mouse_up:
-            new_score_value = score_value+1
+        new_score_value += 1
+        transparent = (0, 0, 0, 0)
+        self.image.fill(transparent)
+        self.is_selected = True
 
-            transparent = (0, 0, 0, 0)
-            self.image.fill(transparent)
-            self.is_selected = True
-
-            # Handle score up
-            for score_ in score_instances:
-                score_.hide()
-            
-            new_score = ScoreClass(
-                score = new_score_value,
-                pos = (self.screen.get_width()-(self.screen.get_width()/2), 25), 
-                text_rgb=BLACK_BLUE,
-                screen = self.screen
-            )
-            score_instances.append(new_score)
+        # Handle score up
+        for score_ in score_instances:
+            score_.hide()
+        
+        new_score = ScoreClass(
+            score = new_score_value,
+            pos = (self.screen.get_width()-(self.screen.get_width()/2), 25), 
+            text_rgb=BLACK_BLUE,
+            screen = self.screen
+        )
+        score_instances.append(new_score)
 
         return new_score_value 
             

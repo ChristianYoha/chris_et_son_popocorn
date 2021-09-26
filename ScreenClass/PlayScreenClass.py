@@ -13,80 +13,49 @@ class PlayScreenClass:
     def timer_run(self, new_countdown, timer_instances, screen, BLACK_BLUE):
         for timer in timer_instances:
             timer.hide()
-        new_timer = TimerClass(
-            second = new_countdown,
-            pos = (screen.get_width()-(screen.get_width()/10), 25), 
-            text_rgb=BLACK_BLUE,
-            screen = screen
-        )
+        new_timer = TimerClass(second = new_countdown,pos = (screen.get_width()-(screen.get_width()/10), 25), text_rgb=BLACK_BLUE, screen = screen)
         timer_instances.append(new_timer)
 
     def play_screen(self, screen, pygame, clock, SCREEN, BLACK_BLUE, BLACK, SCORE, GameState):
-        back_btn = ButtonClass(
-            center_position=(55, 20),
-            font_size=18,
-            text_rgb=BLACK,
-            text="<- Retour",
-            action=GameState.HOME,
-        )
-
+        back_btn = ButtonClass(center_position=(55, 20),font_size=18,text_rgb=BLACK,text="<- Retour",action=GameState.HOME)
         array_of_pops=[]
         array_of_teeth=[]
         cpt = 0
         loop = 0
         loop2 = 0
 
+        # add to list all teeths instances
         while loop2 < 10:
-            teeth = TeethClass(
-                screen = screen,
-                pos_x= random.randint(20, (screen.get_width()-30)),
-                pos_y= random.randint(50, (screen.get_height()-20)),
-            )
+            teeth = TeethClass(screen = screen,pos_x= random.randint(20, (screen.get_width()-30)),pos_y= random.randint(50, (screen.get_height()-20)))
             if teeth.pos_x < (screen.get_width()-20) and teeth.pos_y < (screen.get_height()-20):
-                array_of_teeth.append(
-                    teeth
-                )
+                array_of_teeth.append(teeth)
                 loop2 = loop2 +1
 
-
+        # add to list all instances 
         while loop < 200:
             cpt = cpt+1
-            popcorn = PopcornClass(
-                screen = screen,
-                pos_x= random.randint(20, (screen.get_width()-30)),
-                pos_y= random.randint(50, (screen.get_height()-20)),
-                imgId= cpt
-            )
+            popcorn = PopcornClass(screen = screen,pos_x= random.randint(20, (screen.get_width()-30)),pos_y= random.randint(50, (screen.get_height()-20)),imgId= cpt)
             if cpt == 10:
                 cpt = 0
             if popcorn.pos_x < (screen.get_width()-20) and popcorn.pos_y < (screen.get_height()-20):
-                array_of_pops.append(
-                    popcorn
-                )
+                array_of_pops.append(popcorn)
                 loop = loop +1
 
         # Score
         score_instances = []
         new_score = 0
-        score = ScoreClass(
-            score=new_score,
-            pos = (screen.get_width()-(screen.get_width()/2), 25), 
-            text_rgb=BLACK_BLUE,
-            screen = screen
-        )
+        score = ScoreClass(score=new_score,pos = (screen.get_width()-(screen.get_width()/2), 25), text_rgb=BLACK_BLUE,screen = screen)
         score_instances.append(score)
 
         # Timer
         timer_instances = []
         countdown = 30
         pygame.time.set_timer(pygame.USEREVENT, 1000)
-        timer = TimerClass(
-            second = str(countdown),
-            pos = (screen.get_width()-(screen.get_width()/10), 25), 
-            text_rgb=BLACK_BLUE,
-            screen = screen
-        )
+        timer = TimerClass(second = str(countdown),pos = (screen.get_width()-(screen.get_width()/10), 25), text_rgb=BLACK_BLUE,screen = screen)
         timer_instances.append(timer)
+
+        #Teeth selected index 
+        teeth_selected_index = None
 
         while True:
             screen.fill(SCREEN)
@@ -124,15 +93,19 @@ class PlayScreenClass:
 
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     mouse_up = True
-                    # Handle teeth selected
-                    for teeth in array_of_teeth:
-                        #  This function return the new score value
-                        new_score = teeth.select(pygame.mouse.get_pos(), mouse_up, score_instances, new_score, BLACK_BLUE)
-                    
+                    # for teeth in array_of_teeth:
+                    for idx, teeth in enumerate(array_of_teeth):
+                        if teeth.rect.collidepoint(pygame.mouse.get_pos()):
+                            if idx != teeth_selected_index:
+                                #  This function return the new score value
+                                returned_score = teeth.select(score_instances, new_score, BLACK_BLUE)
+                                new_score = returned_score
+                                teeth_selected_index = idx
+                            
                     # Handle pop selected
                     for pop in array_of_pops:
-                        # This function return .......
                         pass
+                        # This function return .......
 
             # Action for go back
             btn_action = back_btn.update(pygame.mouse.get_pos(), mouse_up)
@@ -142,11 +115,13 @@ class PlayScreenClass:
 
             # Action for stop game by good score
             if new_score == 10 :
+                SCORE.clear()
                 SCORE.append(new_score)
                 return GameState.ENDGAME
             
             #Action for stop game by times'up
             if countdown == 0 :
+                SCORE.clear()
                 SCORE.append(new_score)
                 return GameState.ENDGAME
                 
